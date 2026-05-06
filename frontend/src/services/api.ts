@@ -4,7 +4,15 @@ import {
   PageResponse, ActivityLog, Status, Priority 
 } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+declare global {
+  interface Window {
+    __APP_CONFIG__?: {
+      API_URL?: string;
+    };
+  }
+}
+
+const API_URL = window.__APP_CONFIG__?.API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: API_URL,

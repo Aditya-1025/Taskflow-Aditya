@@ -8,4 +8,10 @@ server {
     location / {
         try_files $uri $uri/ /index.html;
     }
+
+    location = /env.js {
+        add_header Cache-Control "no-store";
+        default_type application/javascript;
+        alias /usr/share/nginx/html/env.js;
+    }
 }
