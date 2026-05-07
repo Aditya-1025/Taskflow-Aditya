@@ -18,7 +18,7 @@ public class DashboardController {
     private final DashboardService dashboardService;
     private final AuthUtils authUtils;
 
-    @GetMapping
+    @GetMapping({"", "/stats"})
     public ResponseEntity<DashboardStats> getDashboard() {
         User user = authUtils.getCurrentUser();
         return ResponseEntity.ok(dashboardService.getDashboardStats(user));
