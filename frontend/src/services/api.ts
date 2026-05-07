@@ -13,8 +13,9 @@ declare global {
 }
 
 const normalizeApiUrl = (url: string) => {
-  const trimmedUrl = url.replace(/\/+$/, '');
-  return trimmedUrl.endsWith('/api') ? trimmedUrl : `${trimmedUrl}/api`;
+  const trimmedUrl = url.trim().replace(/\/+$/, '');
+  const absoluteUrl = /^https?:\/\//i.test(trimmedUrl) ? trimmedUrl : `https://${trimmedUrl}`;
+  return absoluteUrl.endsWith('/api') ? absoluteUrl : `${absoluteUrl}/api`;
 };
 
 const API_URL = normalizeApiUrl(
