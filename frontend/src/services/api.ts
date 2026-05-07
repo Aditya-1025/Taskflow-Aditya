@@ -12,7 +12,14 @@ declare global {
   }
 }
 
-const API_URL = window.__APP_CONFIG__?.API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const normalizeApiUrl = (url: string) => {
+  const trimmedUrl = url.replace(/\/+$/, '');
+  return trimmedUrl.endsWith('/api') ? trimmedUrl : `${trimmedUrl}/api`;
+};
+
+const API_URL = normalizeApiUrl(
+  window.__APP_CONFIG__?.API_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080'
+);
 
 const api = axios.create({
   baseURL: API_URL,
