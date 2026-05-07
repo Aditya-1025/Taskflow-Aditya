@@ -82,7 +82,8 @@ export interface ActivityLog {
   id: number;
   action: string;
   description: string;
-  user: User;
+  userId?: number;
+  userName: string;
   projectId?: number;
   taskId?: number;
   createdAt: string;

@@ -227,7 +227,7 @@ function ActivityFeed({ projectId }: { projectId: number }) {
           </div>
           <div className="pb-6">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-bold text-sm">{log.user?.name || 'System'}</span>
+              <span className="font-bold text-sm">{log.userName || 'System'}</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase">
                 {log.action.replace(/_/g, ' ')}
               </span>
