@@ -22,4 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @Query("SELECT DISTINCT p FROM Project p WHERE p.owner = :user OR EXISTS " +
            "(SELECT m FROM ProjectMember m WHERE m.project = p AND m.user = :user)")
     List<Project> findAllAccessibleByUser(@Param("user") User user);
+
+    @Query("SELECT COUNT(DISTINCT p) FROM Project p WHERE :admin = true OR p.owner = :user OR EXISTS " +
+           "(SELECT m FROM ProjectMember m WHERE m.project = p AND m.user = :user)")
+    long countAccessibleByUser(@Param("user") User user, @Param("admin") boolean admin);
 }

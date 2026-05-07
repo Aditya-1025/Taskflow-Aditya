@@ -11,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class ActivityLogService {
@@ -33,40 +31,15 @@ public class ActivityLogService {
 
     @Transactional(readOnly = true)
     public PageResponse<ActivityLogResponse> getLogs(Long projectId, Long taskId, Pageable pageable) {
-        Page<ActivityLog> logsPage;
-        if (projectId != null && taskId != null) {
-            logsPage = activityLogRepository.findByProjectIdAndTaskIdOrderByCreatedAtDesc(projectId, taskId, pageable);
-        } else if (projectId != null) {
-            logsPage = activityLogRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable);
-        } else if (taskId != null) {
-            logsPage = activityLogRepository.findByTaskIdOrderByCreatedAtDesc(taskId, pageable);
-        } else {
-            logsPage = activityLogRepository.findAllByOrderByCreatedAtDesc(pageable);
-        }
+        Page<ActivityLogResponse> logsPage = activityLogRepository.findResponses(projectId, taskId, pageable);
 
         return PageResponse.<ActivityLogResponse>builder()
-                .content(logsPage.getContent().stream()
-                        .map(this::mapToResponse)
-                        .collect(Collectors.toList()))
+                .content(logsPage.getContent())
                 .pageNumber(logsPage.getNumber())
                 .pageSize(logsPage.getSize())
                 .totalElements(logsPage.getTotalElements())
                 .totalPages(logsPage.getTotalPages())
                 .last(logsPage.isLast())
-                .build();
-    }
-
-    private ActivityLogResponse mapToResponse(ActivityLog log) {
-        User user = log.getUser();
-        return ActivityLogResponse.builder()
-                .id(log.getId())
-                .action(log.getAction())
-                .description(log.getDescription())
-                .userId(user != null ? user.getId() : null)
-                .userName(user != null ? user.getName() : "System")
-                .projectId(log.getProjectId())
-                .taskId(log.getTaskId())
-                .createdAt(log.getCreatedAt())
                 .build();
     }
 }

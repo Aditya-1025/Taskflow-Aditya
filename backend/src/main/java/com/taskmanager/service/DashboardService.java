@@ -1,7 +1,6 @@
 package com.taskmanager.service;
 
 import com.taskmanager.dto.dashboard.DashboardStats;
-import com.taskmanager.model.Project;
 import com.taskmanager.model.Task;
 import com.taskmanager.model.User;
 import com.taskmanager.repository.ProjectRepository;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,36 +21,23 @@ public class DashboardService {
     private final TaskRepository taskRepository;
 
     public DashboardStats getDashboardStats(User user) {
-        List<Project> userProjects = user.getRole() == User.Role.ADMIN
-                ? projectRepository.findAll()
-                : projectRepository.findAllAccessibleByUser(user);
-
-        List<Task> allTasks = userProjects.stream()
-                .flatMap(p -> taskRepository.findByProject(p).stream())
-                .collect(Collectors.toList());
-
+        boolean admin = user.getRole() == User.Role.ADMIN;
         LocalDate today = LocalDate.now();
 
-        long todoCount = allTasks.stream()
-                .filter(t -> t.getStatus() == Task.Status.TODO).count();
-        long inProgressCount = allTasks.stream()
-                .filter(t -> t.getStatus() == Task.Status.IN_PROGRESS).count();
-        long doneCount = allTasks.stream()
-                .filter(t -> t.getStatus() == Task.Status.DONE).count();
-        long overdueCount = allTasks.stream()
-                .filter(t -> t.getDueDate() != null
-                        && t.getDueDate().isBefore(today)
-                        && t.getStatus() != Task.Status.DONE)
-                .count();
-
-        long lowCount = allTasks.stream().filter(t -> t.getPriority() == Task.Priority.LOW).count();
-        long mediumCount = allTasks.stream().filter(t -> t.getPriority() == Task.Priority.MEDIUM).count();
-        long highCount = allTasks.stream().filter(t -> t.getPriority() == Task.Priority.HIGH).count();
-        long criticalCount = allTasks.stream().filter(t -> t.getPriority() == Task.Priority.CRITICAL).count();
+        long totalProjects = projectRepository.countAccessibleByUser(user, admin);
+        long totalTasks = taskRepository.countAccessibleByUser(user, admin);
+        long todoCount = taskRepository.countAccessibleByUserAndStatus(user, admin, Task.Status.TODO);
+        long inProgressCount = taskRepository.countAccessibleByUserAndStatus(user, admin, Task.Status.IN_PROGRESS);
+        long doneCount = taskRepository.countAccessibleByUserAndStatus(user, admin, Task.Status.DONE);
+        long overdueCount = taskRepository.countAccessibleOverdueByUser(user, admin, today, Task.Status.DONE);
+        long lowCount = taskRepository.countAccessibleByUserAndPriority(user, admin, Task.Priority.LOW);
+        long mediumCount = taskRepository.countAccessibleByUserAndPriority(user, admin, Task.Priority.MEDIUM);
+        long highCount = taskRepository.countAccessibleByUserAndPriority(user, admin, Task.Priority.HIGH);
+        long criticalCount = taskRepository.countAccessibleByUserAndPriority(user, admin, Task.Priority.CRITICAL);
 
         return DashboardStats.builder()
-                .totalProjects(userProjects.size())
-                .totalTasks(allTasks.size())
+                .totalProjects((int) totalProjects)
+                .totalTasks((int) totalTasks)
                 .todoCount((int) todoCount)
                 .inProgressCount((int) inProgressCount)
                 .doneCount((int) doneCount)
